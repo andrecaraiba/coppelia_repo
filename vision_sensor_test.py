@@ -70,24 +70,26 @@ if clientID!=-1:
     print ('Connected to remote API server')
 
     #Get Handle
-    returnCode, camHandle = sim.simxGetObjectHandle(clientID, 'Vision_sensor', sim.simx_opmode_oneshot_wait)
-    returnCode, blueCuboidHandle = sim.simxGetObjectHandle(clientID, 'Cuboid[1]', sim.simx_opmode_oneshot_wait)
-    returnCode, yellowCuboidHandle = sim.simxGetObjectHandle(clientID, 'Cuboid[3]', sim.simx_opmode_oneshot_wait)
-    returnCode, redCuboidHandle = sim.simxGetObjectHandle(clientID, 'Cuboid[5]', sim.simx_opmode_oneshot_wait)
-    returnCode = 1
+    returnCode, camHandle = sim.simxGetObjectHandle(clientID, 'Vision_sensor', sim.simx_opmode_blocking)
+    returnCode, dummyCamHandle = sim.simxGetObjectHandle(clientID, 'DummyCam', sim.simx_opmode_blocking)
+    returnCode, cuboidBlueHandle = sim.simxGetObjectHandle(clientID, 'CuboidBlue', sim.simx_opmode_blocking)
+    #returnCode, yellowCuboidHandle = sim.simxGetObjectHandle(clientID, 'Cuboid[3]', sim.simx_opmode_blocking)
+    #returnCode, redCuboidHandle = sim.simxGetObjectHandle(clientID, 'Cuboid[5]', sim.simx_opmode_blocking)
 
     #Get Image
     err, resolution, raw_img = sim.simxGetVisionSensorImage(clientID, camHandle, 0, sim.simx_opmode_streaming)
     #Get Distance
-    err, distance_data_blue = sim.simxCheckDistance(clientID, camHandle, blueCuboidHandle, sim.simx_opmode_streaming)
-    err, distance_data_yellow = sim.simxCheckDistance(clientID, camHandle, yellowCuboidHandle, sim.simx_opmode_streaming)
-    err, distance_data_red = sim.simxCheckDistance(clientID, camHandle, redCuboidHandle, sim.simx_opmode_streaming)
+    err, distance_data_blue = sim.simxCheckDistance(clientID, dummyCamHandle, cuboidBlueHandle, sim.simx_opmode_streaming)
+    #err, distance_data_yellow = sim.simxCheckDistance(clientID, camHandle, yellowCuboidHandle, sim.simx_opmode_streaming)
+    #err, distance_data_red = sim.simxCheckDistance(clientID, camHandle, redCuboidHandle, sim.simx_opmode_streaming)
     while(sim.simxGetConnectionId(clientID) != -1):
         #Get Distance
-        err, distance_data_blue = sim.simxCheckDistance(clientID, camHandle, blueCuboidHandle, sim.simx_opmode_buffer)
-        err, distance_data_yellow = sim.simxCheckDistance(clientID, camHandle, yellowCuboidHandle, sim.simx_opmode_buffer)
-        err, distance_data_red = sim.simxCheckDistance(clientID, camHandle, redCuboidHandle, sim.simx_opmode_buffer)
-        distance_data = [distance_data_blue, distance_data_yellow, distance_data_red]
+        err, distance_data_blue = sim.simxCheckDistance(clientID, dummyCamHandle, cuboidBlueHandle, sim.simx_opmode_buffer)
+        print(err)
+        #err, distance_data_yellow = sim.simxCheckDistance(clientID, camHandle, yellowCuboidHandle, sim.simx_opmode_buffer)
+        #err, distance_data_red = sim.simxCheckDistance(clientID, camHandle, redCuboidHandle, sim.simx_opmode_buffer)
+        #distance_data = [distance_data_blue, distance_data_yellow, distance_data_red]
+        distance_data = [distance_data_blue]
         err, resolution, raw_img = sim.simxGetVisionSensorImage(clientID, camHandle, 0, sim.simx_opmode_buffer)
         #distance_data = [3.4, 3.5, 3.8]
         if err == sim.simx_return_ok:
@@ -100,7 +102,7 @@ if clientID!=-1:
             cv2.imshow('image rgb rotated Flip', flip)
             print(distance_data)
             #save image
-            if cont % 1000 == 0: 
+            if cont % 3000 == 0: 
                 saveImageData(DIR, 'image'+str(img_number)+'.png', flip)
                 saveDistanceData(DIR, 'image'+str(img_number)+'.txt', distance_data)
                 cont = 0
